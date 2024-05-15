@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace LinqTutorials
 {
@@ -335,9 +336,13 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<Emp> Task12()
         {
-            IEnumerable<Emp> result = null;
+            IEnumerable<Emp> result = Emps.GetEmpsWithSubordinates();;
             return result;
         }
+        
+        
+
+        
 
         /// <summary>
         /// The method below should return a single int number.
@@ -350,6 +355,11 @@ namespace LinqTutorials
         {
             int result = 0;
             //result=
+            result = arr
+                .GroupBy(n => n)
+                .Where(g => g.Count() % 2 != 0)
+                .Select(g => g.Key)
+                .Single();
             return result;
         }
 
@@ -357,10 +367,18 @@ namespace LinqTutorials
         /// Return only those departments that have exactly 5 employees or no employees at all.
         /// Sort the result by department name in ascending order.
         /// </summary>
-        public static IEnumerable<Dept> Task14()
-        {
-            IEnumerable<Dept> result = null;
+        public static IEnumerable<Dept> Task14() // nie mam pojęcia czemu zwraca mi identyfikator odpowiedzi przy wypisywaniu
+        {                                        // w Console.WriteLine(emp) emp należy zamienić na emp.Dname by wypisało odpowiedni 
+            //IEnumerable<Dept> result = null;   // departament
             //result =
+            IEnumerable<Dept> result = Depts
+                .GroupJoin(Emps, 
+                    d => d.Deptno, 
+                    e => e.Deptno, 
+                    (d, emps) => new { Dept = d, EmployeeCount = emps.Count() })
+                .Where(x => x.EmployeeCount == 5 || x.EmployeeCount == 0)
+                .OrderBy(x => x.Dept.Dname)
+                .Select(x => x.Dept);
             return result;
         }
         
@@ -371,10 +389,23 @@ namespace LinqTutorials
         ///     HAVING COUNT(*)>2
         ///     ORDER BY COUNT(*) DESC;
         /// </summary>
-        public static IEnumerable<Object> Task15()
-        {
-            IEnumerable<Dept> result = null;
+        public static IEnumerable<JobStats> Task15()// wydaje mi się że żaden rekord nie spelnia tych wymagań
+        {                                       
+            IEnumerable<JobStats> result = null;
             //result =
+            result = Emps
+                .Where(e => e.Job.Contains('A'))
+                .GroupBy(e => e.Job)
+                .Where(g => g.Count() > 2)
+                .OrderByDescending(g => g.Count())
+                .Select(g => new JobStats()
+                {
+                    Praca = g.Key,
+                    LiczbaPracownikow = g.Count()
+                    
+                })
+                .ToList();
+
             return result;
         }
         
@@ -383,8 +414,11 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<Object> Task16()
         {
-            IEnumerable<Dept> result = null;
-            //result =
+            IEnumerable<object> result =Emps.Join(Depts,
+                emp => emp.Deptno,
+                dept => dept.Deptno,
+                (emp, dept) => new { Emp = emp, Dept = dept });
+            
             return result;
         }
     }
@@ -394,9 +428,21 @@ namespace LinqTutorials
         //Put your extension methods here
         public static IEnumerable<Emp> GetEmpsWithSubordinates(this IEnumerable<Emp> emps)
         {
-            var result = emps.Where(e => emps.Any(e2 => e2.Mgr == e.Mgr)).OrderBy(e => e.Ename).ThenByDescending(e => e.Salary);
-            return result;
+            return emps
+                .Where(e => emps.Any(sub => sub.Mgr == e)) 
+                .OrderBy(e => e.Ename[1]) 
+                .ThenByDescending(e => e.Salary); 
         }
 
+    }
+    public class JobStats
+    {
+        public string Praca { get; set; }
+        public int LiczbaPracownikow { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Praca}, {LiczbaPracownikow}";
+        }
     }
 }
