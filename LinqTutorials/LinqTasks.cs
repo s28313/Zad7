@@ -262,6 +262,8 @@ namespace LinqTutorials
         public static bool Task8()
         {
             bool result = false;
+            int value = Emps.Where(e => e.Job == "Backend programmer").GroupBy(e => e.Job).Count();
+            if (value > 0) result = true;
             return result;
         }
 
@@ -271,7 +273,9 @@ namespace LinqTutorials
         /// </summary>
         public static Emp Task9()
         {
-            Emp result = null;
+            Emp result = Emps.Where(e => e.Job == "Frontend programmer")
+                .OrderByDescending(e => e.HireDate)
+                .FirstOrDefault();;
             return result;
         }
 
@@ -309,7 +313,16 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<object> Task11()
         {
-            IEnumerable<object> result = null;
+            IEnumerable<object> result =  Emps
+                .Join(Depts,
+                    e => e.Deptno,
+                    d => d.Deptno,
+                    (e, d) => new { e.Ename, e.Job, d.Dname }) 
+                .GroupBy(ed => ed.Dname) 
+                .Where(g => g.Count() > 1)
+                .Select(g => new { name = g.Key, numOfEmployees = g.Count() })
+                .ToList();
+            
             return result;
         }
 

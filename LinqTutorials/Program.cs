@@ -6,7 +6,7 @@ namespace LinqTutorials
     {
         static void Main(string[] args)
         {
-            var t = LinqTasks.Task7();
+            var t = LinqTasks.Task11();
             
             //Console.WriteLine(t);
 
@@ -14,7 +14,9 @@ namespace LinqTutorials
             { 
                 Console.WriteLine(emp);
             }
+            
 
         }
+        
     }
 }
